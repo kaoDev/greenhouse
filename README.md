@@ -76,6 +76,7 @@ To learn more take a look in the `functions/index.js` file.
   - `firebase login`
 - connect to an existing firebase project
   - `firebase use`
+- change firebase API keys and URLs to use your own project
 
 This application uses an gmail account to send emails to listed users in the
 `users` collection when the soil gets dry. So you need to use an existing
