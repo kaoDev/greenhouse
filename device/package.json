@@ -1,0 +1,14 @@
+{
+  "name": "firebase-device",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "spi-device": "^2.0.5",
+    "node-dht-sensor": "^0.0.34",
+    "onoff": "^3.2.2",
+    "sleep-promise": "^8.0.1",
+    "yargs": "^12.0.5",
+    "firebase-admin": "6.3.0"
+  }
+}

@@ -1,0 +1,14 @@
+[Unit]
+Description=Node.js service to measure temperature and humidity and sync data with firebase
+
+[Service]
+PIDFile=/tmp/firebaseSensor.pid
+User=pi
+Group=users
+Restart=always
+KillSignal=SIGQUIT
+WorkingDirectory=/home/pi/firebase-device/
+ExecStart=/home/pi/firebase-device/indes.js
+
+[Install]
+WantedBy=multi-user.target
