@@ -8,6 +8,8 @@ admin.initializeApp(functions.config().firebase)
 
 const db = admin.firestore()
 
+db.settings({ timestampsInSnapshots: true })
+
 // Configure the email transport using the default SMTP transport and a GMail account.
 // For Gmail, enable these:
 // 1. https://www.google.com/settings/security/lesssecureapps
