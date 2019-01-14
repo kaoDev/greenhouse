@@ -1,68 +1,96 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Greenhouse
 
-## Available Scripts
+automate your greenhouse with a Raspberry Pi zero some sensors and firebase.
 
-In the project directory, you can run:
+You can read more about how this project was made on
+[kalleott.de/iot](https://kalleott.de/iot)
 
-### `npm start`
+## Getting started
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Install dependencies
 
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
+```bash
+npm install
+cd functions
+npm install
+cd ..
+```
 
-### `npm test`
+## UI Code
 
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+The UI code for this application is react based and enables you to see the
+current greenhouse state (temperature, air humidity and soil moisture values).
+With a slider you can edit the current reference value to determine "dry"
+moisture values. It is dry when the sensor value is bigger than the reference
+value.
 
-### `npm run build`
+## Device Code
 
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The code running on the Raspberry Pi is located in the `device/index.js` file.
+It can be started with 2 arguments, the interval in milliseconds
+(`-interval 60000` or `--verbose 60000`) in which the sensors should trigger and
+a verbose (`-v` or `--verbose`) flag for more logging. The default interval is
+1800000 which is equivalent to 30 minutes.
 
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+```
+node index.js -v -i 5000
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The wiring diagram can be seen in the greenhouse-schematics.png image.
 
-### `npm run eject`
+For the connection to firebase generate a new private key in "service accounts"
+of the project settings in the firebase console and save it as
+`firebase-key.json` in the same folder as the device app on the Raspberry Pi.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Serverless Code
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+To add functions to your project you can init a project in the `functions`
+directory with the command `firebase init`. This project has a main index.js
+file and every exported function (`exports.functionName`) is deployed as a
+firebase function.
 
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+For example the function to check if the plants are dry on a new soil sensor
+value looks like this:
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```js
+exports.checkIfPlantsAreDryOnSensorChange = functions.firestore
+  .document('/soilMoistureData/{eventId}')
+  .onCreate(async snap => {
+    const sensorValue = snap.data().value
 
-## Learn More
+    const reference = await getDryReferenceValue()
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    updateIsDry(sensorValue, reference)
+  })
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+To learn more take a look in the `functions/index.js` file.
 
-### Code Splitting
+## Open ToDos to get started with your own application
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+### firebase
 
-### Analyzing the Bundle Size
+- install firebase-tools:
+  - `npm install -g firebase-tools`
+- login with the firebase tools
+  - `firebase login`
+- connect to an existing firebase project
+  - `firebase use`
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+This application uses an gmail account to send emails to listed users in the
+`users` collection when the soil gets dry. So you need to use an existing
+account or create a new one. To enable the cloud functions to send emails you
+must set 2 environment variables for firebase:
 
-### Making a Progressive Web App
+```bash
+firebase functions:config:set gmail.email=aGmailAccount@gmail.com
+firebase functions:config:set gmail.password=thePasswordForThisAccount
+```
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+To deploy the application start with building the UI app, then run the firebase
+deploy command:
 
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+```bash
+npm run build
+firebase deploy
+```
