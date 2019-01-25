@@ -68,7 +68,7 @@ async function getLastSoilValue() {
 }
 
 function updateIsDry(sensorValue, reference) {
-  const isDry = sensorValue < reference
+  const isDry = sensorValue > reference
 
   const soilDataComputed = db.doc('/computedValues/soilData')
 
