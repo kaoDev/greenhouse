@@ -15,6 +15,9 @@ action "test frontend" {
   uses = "actions/npm@3c8332795d5443adc712d30fa147db61fd520b5a"
   needs = ["install react app deps"]
   args = "test"
+  env = {
+    CI = "true"
+  }
 }
 
 action "build frontend" {
